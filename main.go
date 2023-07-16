@@ -30,16 +30,29 @@ func setupCtrlCHandler() {
 func main() {
 	setupCtrlCHandler()
 	movie := flag.Bool("movie", false, "save as avi")
+	spf := flag.Int("spf", 0, "set seconds per frame")
 	baseurl := flag.String("url", "", "camera URL to fetch images from")
+	fullurl := flag.String("fullurl", "", "camera URL to fetch images from")
 	flag.Parse()
-	if *baseurl == "" {
-		fmt.Fprintf(os.Stderr, "must specific base camera url")
+	if *baseurl == "" && *fullurl == "" {
+		fmt.Fprintf(os.Stderr, "must specific base or full camera url")
 		return
 	}
-	url := *baseurl + "/still"
+
+	url := ""
+
+	if *fullurl != "" {
+		url = *fullurl
+	} else {
+		url = *baseurl + "/still"
+	}
 
 	shot := 1
-	ticker := time.NewTicker(1 * time.Second)
+	secperframe := 1
+	if *spf != 0 {
+		secperframe = *spf
+	}
+	ticker := time.NewTicker(time.Duration(secperframe) * time.Second)
 
 	var aw mjpeg.AviWriter
 
